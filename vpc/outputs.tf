@@ -1,3 +1,5 @@
+#outputs
+
 # export the region
 output "region" {
   value = var.region
