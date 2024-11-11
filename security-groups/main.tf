@@ -54,74 +54,74 @@ resource "aws_security_group" "bastion_security_group" {
   }
 
   tags = {
-    Name = "${var.project}-${}-bastion-sg"
+    Name = "${var.project}-${var.environment}-bastion-sg"
   }
 }
 
 # create security group for the app server
 resource "aws_security_group" "app_server_security_group" {
-  name        = "${}-${}-app-server-sg"
+  name        = "${var.project}-${var.environment}-app-server-sg"
   description = "enable http/https access on port 80/443 via alb sg"
-  vpc_id      = 
+  vpc_id      = var.vpc_id
 
   ingress {
-    description     = "http access"
-    from_port       = 
-    to_port         = 
-    protocol        = 
-    security_groups = 
+    description     = "http access via ALB"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_security_group.id]
   }
 
   ingress {
     description     = "https access"
-    from_port       = 
-    to_port         = 
-    protocol        = 
-    security_groups = 
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_security_group.id]
   }
 
-  egress {
-    from_port   = 
-    to_port     = 
-    protocol    = 
-    cidr_blocks = 
+   egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1" # All traffic
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "${}-${}-app-server-sg"
+    Name = "${var.project}-${var.environment}-app-server-sg"
   }
 }
 
 # create security group for the database
 resource "aws_security_group" "database_security_group" {
-  name        = "${}-${}-database-sg"
-  description = "enable mysql/aurora access on port 3306"
-  vpc_id      = 
+  name        = "${var.project}-${var.environment}-database-sg"
+  description = "Enable MySQL/Aurora access on port 3306"
+  vpc_id      = var.vpc_id
 
   ingress {
-    description     = "mysql/aurora access"
-    from_port       = 
-    to_port         = 
-    protocol        = 
-    security_groups = 
+    description     = "MySQL/Aurora access from App Server"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app_server_security_group.id]
   }
 
   ingress {
     description     = "custom access"
-    from_port       = 
-    to_port         = 
-    protocol        = 
-    security_groups = 
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app_server_security_group.id]
   }
 
   egress {
-    from_port   = 
-    to_port     = 
-    protocol    = 
-    cidr_blocks = 
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1" # All traffic
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "${}-${}-database-sg"
+    Name = "${var.project}-${var.environment}-database-sg"
   }
 }
