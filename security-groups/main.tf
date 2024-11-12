@@ -9,7 +9,7 @@ resource "aws_security_group" "alb_security_group" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [var.cidr_http_https]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -17,7 +17,7 @@ resource "aws_security_group" "alb_security_group" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = [var.cidr_http_https]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -43,7 +43,7 @@ resource "aws_security_group" "bastion_security_group" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.cidr_ssh]
+    cidr_blocks = [var_ssh_ip]
   }
 
   egress {
@@ -108,10 +108,10 @@ resource "aws_security_group" "database_security_group" {
 
   ingress {
     description     = "custom access"
-    from_port       = 5432
-    to_port         = 5432
+    from_port       = 3306
+    to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.app_server_security_group.id]
+    security_groups = [aws_security_group.bastion_security_group.id]
   }
 
   egress {
